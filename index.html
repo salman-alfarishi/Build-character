@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ Build & Ranking</title>
+    
+    <!-- ===== FIREBASE SDK ===== -->
+    <script type="module">
+        // Import fungsi yang dibutuhkan
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue, runTransaction, remove } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+
+        // === KONFIGURASI FIREBASE KAMU ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyDl2H_-ya9X44RoU0oHaiBR6gpqPTp-kUo",
+            authDomain: "build-ranking-app.firebaseapp.com",
+            projectId: "build-ranking-app",
+            storageBucket: "build-ranking-app.firebasestorage.app",
+            messagingSenderId: "253678022302",
+            appId: "1:253678022302:web:86289017e2858b2611158f",
+            databaseURL: "https://build-ranking-app-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // === DATA ITEM ===
+        const slot1ImageUrls = [
+          "https://bioqu.id/uploads/galleries/2349053/26ee5ca1b14961a930b959b12cf8218f.png",
+          "https://bioqu.id/uploads/galleries/2349053/081d6a85dd99a488296f4db18555c513.png",
+          "https://bioqu.id/uploads/galleries/2349053/6b85eea30a881bdf125f10faef96240c.png",
+          "https://bioqu.id/uploads/galleries/2349053/a664f44ab04ec65230ca472395ad7e9a.png",
+          "https://bioqu.id/uploads/galleries/2349053/bba52ea734c4de7cb1b4d5291497a45d.png",
+          "https://bioqu.id/uploads/galleries/2349053/3d5198dd60a5247a9f53291ffc0421ae.png",
+          "https://bioqu.id/uploads/galleries/2349053/a6d75792736cf2ff8c91faade8a05407.png",
+          "https://bioqu.id/uploads/galleries/2349053/e6dba26276567de75caaac6fadc92392.png"
+        ];
+
+        const slot2ImageUrls = [
+            "https://bioqu.id/uploads/galleries/2349087/fee50e05fa5d30e56cfef01899190d57.png",
+            "https://bioqu.id/uploads/galleries/2349087/be2622b6d4734322676f80bc6b61c4a8.png",
+            "https://bioqu.id/uploads/galleries/2349087/3d64ef8ad93b286a664b9b43ae6699d8.png",
+            "https://bioqu.id/uploads/galleries/2349087/54d58cadf9a5d8aefe601b32234e8f09.png",
+            "https://bioqu.id/uploads/galleries/2349087/5832fe2d16151d27d589d7615c288550.png",
+            "https://bioqu.id/uploads/galleries/2349087/0a0db04c0a98df18cf0f2b433b539559.png",
+            "https://bioqu.id/uploads/galleries/2349087/c4f6c7c43bda1d1204fc7e41438be28d.png",
+            "https://bioqu.id/uploads/galleries/2349087/0e235662b295cd9e33975d8961014528.png",
+            "https://bioqu.id/uploads/galleries/2349087/462fe9c50853259f498ea745d0471419.png",
+            "https://bioqu.id/uploads/galleries/2349087/7c1f6a5d5e4a92b3b80d4f8e98afbee4.png",
+            "https://bioqu.id/uploads/galleries/2349087/81096ef53cc980e67a37695a6f3134ee.png",
+            "https://bioqu.id/uploads/galleries/2349087/f100a3f698cbf8a2f248b55df4b1a0c2.png"
+        ];
+
+        const slot3ImageUrls = [
+            "https://bioqu.id/uploads/galleries/2349101/119da02ad76afaaa62766c50be5e229e.png",
+            "https://bioqu.id/uploads/galleries/2349101/8e3bfeab65e051f96b0317896f5cc5c2.png",
+            "https://bioqu.id/uploads/galleries/2349101/fdc5f29022ccc8a039a9003f7ea13cd4.png",
+            "https://bioqu.id/uploads/galleries/2349101/0224351b430f12e7cb5381850815ea16.png",
+            "https://bioqu.id/uploads/galleries/2349101/4c752b1ec6ee36eb471564f02e8c880b.png",
+            "https://bioqu.id/uploads/galleries/2349101/32898d85a5ae4b75f749d7494a4fc9b3.png",
+            "https://bioqu.id/uploads/galleries/2349101/1f9785d076c43e1738c7feae6a0815d4.png",
+            "https://bioqu.id/uploads/galleries/2349101/7a19789c21706c37bb7b70f7699f3398.png",
+            "https://bioqu.id/uploads/galleries/2349101/9240ac1e13c36caa42e8f26ceca87ef9.png",
+            "https://bioqu.id/uploads/galleries/2349101/104b8c482320f741dacbe2f810787644.png",
+            "https://bioqu.id/uploads/galleries/2349101/266060bca35225716d572fe8240b84dd.png",
+            "https://bioqu.id/uploads/galleries/2349101/1de0e02200e6a9748ae071267e97a57c.png",
+            "https://bioqu.id/uploads/galleries/2349101/9b4586d3f61fa1f24d07ce1868d7419f.png",
+            "https://bioqu.id/uploads/galleries/2349101/daf1b109f305f6fbdb7ceacc351875b1.png"
+        ];
+
+        const slot4ImageUrls = [
+            "https://bioqu.id/uploads/galleries/2349116/f71a484777e0c479438910a35c475db1.png",
+            "https://bioqu.id/uploads/galleries/2349116/270026ca010cfdd25788061d7a4717fc.png",
+            "https://bioqu.id/uploads/galleries/2349116/94f24ca96a305749fc33641e76160ae7.png",
+            "https://bioqu.id/uploads/galleries/2349116/a0737c51bbac038ac18883edfdcc924c.png",
+            "https://bioqu.id/uploads/galleries/2349116/a9a2912c8a1f40121f56a9963b9bd9de.png",
+            "https://bioqu.id/uploads/galleries/2349116/64c9d43a80586563d694f50a3127bd92.png",
+            "https://bioqu.id/uploads/galleries/2349116/bef25cb6c1ce824f5a5e6e45132a1f3f.png",
+            "https://bioqu.id/uploads/galleries/2349116/d47254697b6461ca7d7c244c0a7a3cd8.png",
+            "https://bioqu.id/uploads/galleries/2349116/d7b759892294c75b7620b9ed3e8942e7.png",
+            "https://bioqu.id/uploads/galleries/2349116/e3abb2ac3cda2d2995dd6dc88c7d7567.png",
+            "https://bioqu.id/uploads/galleries/2349116/92653c061fc60163b3c3781cf28f07ea.png",
+            "https://bioqu.id/uploads/galleries/2349116/e8de2eee7eeaf0a1bb381dc928f54af4.png",
+            "https://bioqu.id/uploads/galleries/2349116/3435949ce5650263169d02e67717922c.png",
+            "https://bioqu.id/uploads/galleries/2349116/225f824db1a606b3dac6dc3aae256d1b.png",
+            "https://bioqu.id/uploads/galleries/2349116/bd25c4d1b29ed7d6157dd73af1c4ee67.png"
+        ];
+
+        const slot5ImageUrls = [
+            "https://bioqu.id/uploads/galleries/2349132/4df8f04ac64fedd28081fa9e96a21d1c.png",
+            "https://bioqu.id/uploads/galleries/2349132/30ef8255f5b52eaf0a9d64989bad6fd5.png",
+            "https://bioqu.id/uploads/galleries/2349132/4f1b1f2f7145ce8e00a49a015152bba0.png",
+            "https://bioqu.id/uploads/galleries/2349132/bb9122d40f6e7d76785cb72e95e8d338.png",
+            "https://bioqu.id/uploads/galleries/2349132/e0fdd562c001a1aad662078c2a243f60.png",
+            "https://bioqu.id/uploads/galleries/2349132/ce0f3380a5fd260b876f70b5e7bd5f9f.png",
+            "https://bioqu.id/uploads/galleries/2349132/a0a229e33e8e8f6f2b4020d92ec19cd0.png",
+            "https://bioqu.id/uploads/galleries/2349132/72b596c79c73cff63c8629cc28d0f28a.png",
+            "https://bioqu.id/uploads/galleries/2349132/ce67e38e2ae77ee1b4734087892777b5.png",
+            "https://bioqu.id/uploads/galleries/2349132/629e772ded1a99e3e49c64446d35a28c.png",
+            "https://bioqu.id/uploads/galleries/2349132/777ccb8e91f6c9221a287c2c39ac05a7.png",
+            "https://bioqu.id/uploads/galleries/2349132/34923b0d1e910956833648c671d9ab9c.png",
+            "https://bioqu.id/uploads/galleries/2349132/80a508b49063198658c97b5afcdda9b8.png"
+        ];
+
+        const slot6ImageUrls = [
+            "https://bioqu.id/uploads/galleries/2349148/e5a59a04c0f6da3f54c675a1bf307fb0.png",
+            "https://bioqu.id/uploads/galleries/2349148/ae846e4e0c46518c53d517bf14ee87db.jpg",
+            "https://bioqu.id/uploads/galleries/2349148/f891f1f05f158e535f1839f475a2a893.png",
+            "https://bioqu.id/uploads/galleries/2349148/a4d1200432b6c6c2a4fdc7227609aa39.png",
+            "https://bioqu.id/uploads/galleries/2349148/2fcb674d6faf0aa3f02017c16527f210.png",
+            "https://bioqu.id/uploads/galleries/2349148/bacac697683b295a8c9b92afa9399c42.png",
+            "https://bioqu.id/uploads/galleries/2349148/8ece08e74bc00fac9a1a310670dee55a.png",
+            "https://bioqu.id/uploads/galleries/2349148/38661ceb01893a57d47336e8e177dbac.png",
+            "https://bioqu.id/uploads/galleries/2349148/06e438caa5ef23916def9797bf668e62.png",
+            "https://bioqu.id/uploads/galleries/2349148/8f52535cbe1a1197e1cabfa4a72ed796.png",
+            "https://bioqu.id/uploads/galleries/2349148/0194c51db23206b2d4a7ae4db345637b.png",
+            "https://bioqu.id/uploads/galleries/2349148/8a78320e6cda0fcfd726426acde04510.png",
+            "https://bioqu.id/uploads/galleries/2349148/edd2e3a45a31b23fe2184b7455b55620.png",
+            "https://bioqu.id/uploads/galleries/2349148/c43d43611338198425dd84cf0d58e7c0.png",
+            "https://bioqu.id/uploads/galleries/2349148/231c605f649cef3259f0d976af9a42f7.png",
+            "https://bioqu.id/uploads/galleries/2349148/d93cb800b361fffe5a0626084e2e90c1.png",
+            "https://bioqu.id/uploads/galleries/2349148/ef88618b085e3239fc2e7ffe6e608ccb.png",
+            "https://bioqu.id/uploads/galleries/2349148/4a7283a26ebaa2ba2a35166112135ff9.png",
+            "https://bioqu.id/uploads/galleries/2349148/4ebd8236b64951e0069f7e68484345df.png",
+            "https://bioqu.id/uploads/galleries/2349148/1c2fcf06fc1c39622a974b37cc4dd4cb.png",
+            "https://bioqu.id/uploads/galleries/2349148/2ce06f73c1a9b5f8417581587bade697.png",
+            "https://bioqu.id/uploads/galleries/2349148/54e5ab4a56d013b7e9df0546a437bfaa.png",
+            "https://bioqu.id/uploads/galleries/2349148/ff5b205effaccd4ed7137464f16728ed.png",
+            "https://bioqu.id/uploads/galleries/2349148/e8570d2083f3334793b6ad60c0280210.png",
+            "https://bioqu.id/uploads/galleries/2349148/c1b535f40b4c86c72e3814e36b7275e6.png",
+            "https://bioqu.id/uploads/galleries/2349148/c1e0a48c5fb843e8cd7e9e8c3d25131a.png",
+            "https://bioqu.id/uploads/galleries/2349148/dea1677e3c04cb353bf7aaa0ce413f15.png"
+        ];
+
+        let slotTerpilih = null;
+        let userVotedBuilds = {}; // <-- PENYIMPANAN STATUS VOTE USER
+
+        const rankValues = { D: 1, C: 2, B: 3, A: 4, S: 5 };
+        const rankColors = { D: '#6c757d', C: '#28a745', B: '#007bff', A: '#ffc107', S: '#dc3545' };
+
+        // === FUNGSI BUAT KEY UNIK ===
+        function getCurrentBuildKey() {
+            const items = [];
+            for(let i=1; i<=6; i++) {
+                const img = document.getElementById('slot'+i+'-img').src;
+                if(img && img !== window.location.href) {
+                    items.push(img);
+                }
+            }
+            return btoa(items.sort().join('|'));
+        }
+
+        // === FUNGSI MODAL ===
+        window.bukaModal = function(slotId) {
+            slotTerpilih = slotId;
+            const container = document.getElementById('equipmentOptions');
+            container.innerHTML = '';
+
+            let dataArray = [];
+            if(slotId === 'slot1') dataArray = slot1ImageUrls;
+            else if(slotId === 'slot2') dataArray = slot2ImageUrls;
+            else if(slotId === 'slot3') dataArray = slot3ImageUrls;
+            else if(slotId === 'slot4') dataArray = slot4ImageUrls;
+            else if(slotId === 'slot5') dataArray = slot5ImageUrls;
+            else if(slotId === 'slot6') dataArray = slot6ImageUrls;
+
+            dataArray.forEach(url => {
+                const div = document.createElement('div');
+                div.className = 'equipment-option';
+                div.innerHTML = `<img src="${url}" alt="item">`;
+                div.onclick = () => {
+                    document.getElementById(slotId+'-img').src = url;
+                    tutupModal();
+                };
+                container.appendChild(div);
+            });
+
+            document.getElementById('equipmentModal').style.display = 'block';
+        }
+
+        window.tutupModal = function() {
+            document.getElementById('equipmentModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('equipmentModal');
+            if (event.target == modal) {
+                tutupModal();
+            }
+        }
+
+        // === FUNGSI LIKE (TIDAK DIUBAH) ===
+        window.toggleLike = function(slotId) {
+            const imgElement = document.getElementById(slotId + '-img');
+            const imageUrl = imgElement.src;
+
+            if (!imageUrl || imageUrl === window.location.href) return;
+
+            const likeRef = ref(db, 'likes/' + btoa(imageUrl));
+
+            if(!userLiked[imageUrl]) {
+                runTransaction(likeRef, (current) => {
+                    return (current || 0) + 1;
+                });
+                userLiked[imageUrl] = true;
+            } else {
+                runTransaction(likeRef, (current) => {
+                    return Math.max((current || 0) - 1, 0);
+                });
+                userLiked[imageUrl] = false;
+            }
+        }
+
+        function updateLikeDisplay(slotId) {
+            const imgElement = document.getElementById(slotId + '-img');
+            const imageUrl = imgElement.src;
+            const countElement = document.getElementById('like-count-' + slotId);
+            const btnElement = document.getElementById('like-btn-' + slotId);
+
+            if (!imageUrl || imageUrl === window.location.href) {
+                countElement.innerText = "0";
+                btnElement.classList.remove('liked');
+                return;
+            }
+
+            const likeRef = ref(db, 'likes/' + btoa(imageUrl));
+            onValue(likeRef, (snapshot) => {
+                const jumlahLike = snapshot.val() || 0;
+                countElement.innerText = jumlahLike;
+            });
+
+            btnElement.classList.toggle('liked', userLiked[imageUrl]);
+        }
+
+        // === FUNGSI VOTE & RANKING (SUDAH DIPERBAIKI) ===
+        window.voteBuild = function(rank) {
+            const items = [];
+            for(let i=1; i<=6; i++) {
+                const img = document.getElementById('slot'+i+'-img').src;
+                if(img && img !== window.location.href) {
+                    items.push(img);
+                }
+            }
+
+            if(items.length === 0) {
+                alert("Pilih setidaknya satu item dulu!");
+                return;
+            }
+
+            const buildKey = items.sort().join('|');
+            const buildKeyEncoded = btoa(buildKey);
+            const buildRef = ref(db, 'builds/' + buildKeyEncoded);
+
+            // CEK APAKAH USER SUDAH VOTE UNTUK BUILD INI?
+            if(!userVotedBuilds[buildKeyEncoded]) {
+                // --- BELUM VOTE => TAMBAH VOTE ---
+                runTransaction(buildRef, (data) => {
+                    if(data) {
+                        data.votes = (data.votes || 0) + 1;
+                        data.rank = rank;
+                    } else {
+                        data = {
+                            items: items,
+                            rank: rank,
+                            votes: 1,
+                            timestamp: Date.now()
+                        };
+                    }
+                    return data;
+                });
+                
+                // Simpan status user sudah vote
+                userVotedBuilds[buildKeyEncoded] = rank;
+                alert(`Build berhasil diberi nilai ${rank}!`);
+
+            } else {
+                // --- SUDAH VOTE => BATALKAN / KURANGI VOTE ---
+                if(userVotedBuilds[buildKeyEncoded] === rank) {
+                    // Kalau klik tombol YANG SAMA, berarti batal
+                    runTransaction(buildRef, (data) => {
+                        if(data) {
+                            data.votes = Math.max((data.votes || 0) - 1, 0);
+                            // Kalau vote 0, bisa hapus data atau biarkan saja
+                            if(data.votes === 0) {
+                                return null; // Hapus entry dari database
+                            }
+                        }
+                        return data;
+                    });
+
+                    // Hapus status vote
+                    delete userVotedBuilds[buildKeyEncoded];
+                    alert(`Vote untuk nilai ${rank} dibatalkan!`);
+
+                } else {
+                    // Kalau klik tombol BEDA, ganti rank
+                    runTransaction(buildRef, (data) => {
+                        if(data) {
+                            data.rank = rank;
+                            // votes tidak berubah
+                        }
+                        return data;
+                    });
+                    
+                    // Update status vote
+                    userVotedBuilds[buildKeyEncoded] = rank;
+                    alert(`Nilai build diubah menjadi ${rank}!`);
+                }
+            }
+        }
+
+        // Dengarkan perubahan ranking
+        const rankingRef = ref(db, 'builds');
+        onValue(rankingRef, (snapshot) => {
+            const data = snapshot.val();
+            const container = document.getElementById('ranking-result');
+            container.innerHTML = '';
+
+            if(!data) {
+                container.innerHTML = '<p style="text-align:center; color: black !important; opacity:0.8;">Belum ada voting</p>';
+                return;
+            }
+
+            let buildArray = Object.values(data);
+            
+            buildArray.sort((a, b) => {
+                if (rankValues[b.rank] !== rankValues[a.rank]) {
+                    return rankValues[b.rank] - rankValues[a.rank];
+                }
+                return (b.votes || 0) - (a.votes || 0);
+            });
+
+            buildArray.forEach((build) => {
+                const div = document.createElement('div');
+                div.className = 'ranking-item';
+
+                let imagesHtml = '';
+                build.items.forEach(imgUrl => {
+                    imagesHtml += `<img src="${imgUrl}" alt="item">`;
+                });
+
+                div.innerHTML = `
+                    <div class="rank-tier" style="color: ${rankColors[build.rank]}">${build.rank}</div>
+                    <div class="build-items">${imagesHtml}</div>
+                    <div class="score">🗳️ ${build.votes || 0} Vote</div>
+                `;
+
+                container.appendChild(div);
+            });
+        });
+
+        // Inisialisasi
+        updateLikeDisplay('slot1');
+        updateLikeDisplay('slot2');
+        updateLikeDisplay('slot3');
+        updateLikeDisplay('slot4');
+        updateLikeDisplay('slot5');
+        updateLikeDisplay('slot6');
+
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: black !important;
+            text-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 20px;
+            color: black !important;
+            font-weight: bold;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: black !important;
+        }
+
+        .builder-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            align-items: center;
+            justify-items: center;
+        }
+
+        .equipment-area.left,
+        .equipment-area.right {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .slot-wrapper {
+            text-align: center;
+        }
+
+        .slot {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            background: rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .slot:hover {
+            border-color: #fff;
+            transform: scale(1.05);
+        }
+
+        .slot img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .slot .plus-icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 1.2em;
+            color: #0f0;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            color: #ffcc00;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 5px;
+            text-shadow: 0 0 5px #000;
+            transition: all 0.2s;
+        }
+
+        .like-btn:hover {
+            color: #ffdd33;
+            transform: scale(1.1);
+        }
+
+        .like-btn.liked {
+            color: #ff4444;
+        }
+
+        .character-area img {
+            max-height: 320px;
+            width: auto;
+        }
+
+        .vote-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+
+        .rank-buttons button {
+            padding: 12px 25px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+
+        .rank-buttons button:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-D { background: #6c757d; color: white; }
+        .btn-C { background: #28a745; color: white; }
+        .btn-B { background: #007bff; color: white; }
+        .btn-A { background: #ffc107; color: black; }
+        .btn-S { background: #dc3545; color: white; }
+
+        .ranking-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .rank-tier {
+            font-size: 1.8em;
+            font-weight: bold;
+            width: 60px;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .build-items {
+            display: flex;
+            gap: 5px;
+            margin: 0 15px;
+        }
+
+        .build-items img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            padding: 2px;
+        }
+
+        .score {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: black !important;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: #222;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 15px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: white !important;
+            font-size: 1.8em;
+        }
+
+        .equipment-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .equipment-option {
+            width: 65px;
+            height: 65px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #333;
+            overflow: hidden;
+        }
+
+        .equipment-option img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .builder-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .equipment-area.left, .equipment-area.right {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ Build & Ranking</h1>
+        <p class="subtitle">Pilih item, lalu berikan vote!</p>
+
+        <div class="builder-container">
+            <div class="equipment-area left">
+                <div class="slot-wrapper">
+                    <div class="slot" onclick="bukaModal('slot1')">
+                        <img src="" alt="Slot 1" id="slot1-img">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <button class="like-btn" id="like-btn-slot1" onclick="toggleLike('slot1')">❤️ <span id="like-count-slot1" style="color: black !important;">0</span></button>
+                </div>
+                <div class="slot-wrapper">
+                    <div class="slot" onclick="bukaModal('slot2')">
+                        <img src="" alt="Slot 2" id="slot2-img">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <button class="like-btn" id="like-btn-slot2" onclick="toggleLike('slot2')">❤️ <span id="like-count-slot2" style="color: black !important;">0</span></button>
+                </div>
+                <div class="slot-wrapper">
+                    <div class="slot" onclick="bukaModal('slot3')">
+                        <img src="" alt="Slot 3" id="slot3-img">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <button class="like-btn" id="like-btn-slot3" onclick="toggleLike('slot3')">❤️ <span id="like-count-slot3" style="color: black !important;">0</span></button>
+                </div>
+            </div>
+
+            <div class="character-area">
+                <img src="https://bioqu.id/uploads/galleries/1884219/bd84969069000b7b7f49c1c88c779694.jpg" alt="Karakter" class="character">
+            </div>
+
+            <div class="equipment-area right">
+                <div class="slot-wrapper">
+                    <div class="slot" onclick="bukaModal('slot4')">
+                        <img src="" alt="Slot 4" id="slot4-img">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <button class="like-btn" id="like-btn-slot4" onclick="toggleLike('slot4')">❤️ <span id="like-count-slot4" style="color: black !important;">0</span></button>
+                </div>
+                <div class="slot-wrapper">
+                    <div class="slot" onclick="bukaModal('slot5')">
+                        <img src="" alt="Slot 5" id="slot5-img">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <button class="like-btn" id="like-btn-slot5" onclick="toggleLike('slot5')">❤️ <span id="like-count-slot5" style="color: black !important;">0</span></button>
+                </div>
+                <div class="slot-wrapper">
+                    <div class="slot" onclick="bukaModal('slot6')">
+                        <img src="" alt="Slot 6" id="slot6-img">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <button class="like-btn" id="like-btn-slot6" onclick="toggleLike('slot6')">❤️ <span id="like-count-slot6" style="color: black !important;">0</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="vote-section">
+            <h2>🗳️ Berikan Nilai Build Ini</h2>
+            <div class="rank-buttons">
+                <button class="btn-D" onclick="voteBuild('D')">D</button>
+                <button class="btn-C" onclick="voteBuild('C')">C</button>
+                <button class="btn-B" onclick="voteBuild('B')">B</button>
+                <button class="btn-A" onclick="voteBuild('A')">A</button>
+                <button class="btn-S" onclick="voteBuild('S')">S</button>
+            </div>
+        </div>
+
+        <div class="ranking-section">
+            <h2>📊 Daftar Ranking Build</h2>
+            <div id="ranking-result">
+                <p style="text-align:center; color: black !important; opacity:0.8;">Memuat data...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="equipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="tutupModal()">×</span>
+            <h2>Pilih Perlengkapan</h2>
+            <div class="equipment-options" id="equipmentOptions">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
